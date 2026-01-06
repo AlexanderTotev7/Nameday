@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<title>Честит имен ден, Ванина</title>
+
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        overflow: hidden;
+        font-family: 'Inter', 'Segoe UI', sans-serif;
+        background: #0b0b14;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #eaeaea;
+    }
+
+    canvas {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+    }
+
+    .card {
+        position: relative;
+        z-index: 1;
+        background: linear-gradient(145deg, #1a1a28, #11111c);
+        padding: 45px;
+        border-radius: 22px;
+        width: 440px;
+        box-shadow:
+            0 0 0 1px rgba(255,255,255,0.06),
+            0 30px 80px rgba(0,0,0,0.8);
+        transform-style: preserve-3d;
+    }
+
+    h1 {
+        margin: 0 0 20px 0;
+        font-size: 26px;
+        font-weight: 600;
+    }
+
+    .name {
+        color: #6cf2c2;
+    }
+
+    .text {
+        font-size: 16px;
+        line-height: 1.7;
+        color: #cfcfd6;
+        min-height: 100px;
+        white-space: pre-line;
+    }
+</style>
+</head>
+
+<body>
+
+<canvas id="fireworks"></canvas>
+
+<div class="card" id="card">
+    <h1>Честит имен ден, <span class="name">Ванина</span></h1>
+    <div class="text" id="typed"></div>
+</div>
+
+<script>
+/* Typing effect */
+const text =
+`Пожелавам ти здраве, спокойствие
+и неща, които просто се случват навреме.
+
+По-малко шум,
+повече смислени дни
+и поводи за настроение.`;
+
+let i = 0;
+const target = document.getElementById("typed");
+
+(function type() {
+    if (i < text.length) {
+        target.textContent += text.charAt(i++);
+        setTimeout(type, 28);
+    }
+})();
+
+/* Smooth tilt */
+const card = document.getElementById("card");
+let cx = 0, cy = 0, tx = 0, ty = 0;
+
+document.addEventListener("mousemove", e => {
+    tx = (window.innerWidth / 2 - e.clientX) / 35;
+    ty = (window.innerHeight / 2 - e.clientY) / 35;
+});
+
+(function tilt() {
+    cx += (tx - cx) * 0.06;
+    cy += (ty - cy) * 0.06;
+    card.style.transform = `rotateY(${cx}deg) rotateX(${cy}deg)`;
+    requestAnimationFrame(tilt);
+})();
+
+/* Fireworks */
+const canvas = document.getElementById("fireworks");
+const ctx = canvas.getContext("2d");
+
+function resize() {
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+}
+resize();
+addEventListener("resize", resize);
+
+let particles = [];
+
+function firework() {
+    const x = Math.random() * canvas.width;
+    const y = Math.random() * canvas.height * 0.5;
+    const hue = Math.random() * 360;
+
+    for (let i = 0; i < 90; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const s = Math.random() * 4 + 1;
+        particles.push({
+            x, y,
+            vx: Math.cos(a) * s,
+            vy: Math.sin(a) * s,
+            life: 80,
+            hue
+        });
+    }
+}
+
+setInterval(firework, 1600);
+
+(function animate() {
+    ctx.fillStyle = "rgba(11,11,20,0.2)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    particles = particles.filter(p => p.life-- > 0);
+
+    particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.025;
+
+        ctx.fillStyle = `hsl(${p.hue},100%,70%)`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+        ctx.fill();
+    });
+
+    requestAnimationFrame(animate);
+})();
+</script>
+
+</body>
+</html>
